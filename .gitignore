@@ -1,0 +1,16 @@
+# 个人配置（含 token，不上传）
+config.json
+
+# 数据目录（撤回记录 + 媒体文件）
+data/
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 虚拟环境
+venv/
+.venv/
+env/

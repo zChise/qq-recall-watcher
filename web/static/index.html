@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>猫萌</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="layout">
+
+    <!-- 左侧栏 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="app-title">猫萌</span>
+        <span class="global-badge" id="globalBadge"></span>
+      </div>
+      <ul class="chat-list" id="chatList">
+        <li class="chat-item selected" data-key="all" onclick="selectChat(this,'all',null,null)">
+          <span class="chat-label">全部消息</span>
+          <span class="chat-count" id="allCount"></span>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- 消息列表 -->
+    <main class="main-panel">
+      <div id="msgContainer" class="msg-container">
+        <div class="placeholder">暂无撤回消息</div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- 详情弹窗 -->
+  <div class="modal-bg"  id="modalBg"  onclick="closeDetail()"></div>
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-sender" id="modalSender"></div>
+        <div class="modal-time"   id="modalTime"></div>
+      </div>
+      <button class="close-btn" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

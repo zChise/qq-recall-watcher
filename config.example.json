@@ -1,0 +1,7 @@
+{
+  "napcat_ws": "ws://127.0.0.1:3001",
+  "token": "你的NapCat访问令牌",
+  "web_port": 8080,
+  "buffer_minutes": 2,
+  "monitored": "all"
+}
