@@ -66,7 +66,7 @@ cp config.example.json config.json
 **字段说明：**
 
 - `napcat_ws`：NapCat 的 WebSocket 地址，本机默认不用改
-- `token`：在 NapCat 后台 → 网络配置 → WebSocket 服务 中查看
+- `token`：在 NapCat 后台 → 网络配置 → WebSocket 服务 中查看 / 创建
 - `web_port`：本地网页端口，默认 8080
 - `buffer_minutes`：消息在内存中保留多久（分钟），超过此时间的消息撤回后无法捕获
 - `monitored`：`"all"` 监控所有，或指定群号 / QQ 号的数组，例如 `[123456789, 987654321]`
