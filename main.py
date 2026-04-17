@@ -137,6 +137,13 @@ async def _cleanup_loop():
 
 async def main():
     init_db()
+    loop = asyncio.get_running_loop()
+    def _suppress_win64(loop, ctx):
+        exc = ctx.get("exception")
+        if isinstance(exc, OSError) and getattr(exc, "winerror", None) == 64:
+            return
+        loop.default_exception_handler(ctx)
+    loop.set_exception_handler(_suppress_win64)
     token  = _cfg.get("token", "")
     client = NapCatClient(NAPCAT_WS, on_message, on_recall, token=token)
     server = uvicorn.Server(

@@ -7,13 +7,14 @@
 ## 功能
 
 - 实时捕获群聊 + 私聊消息，缓存在内存中（默认 2 分钟窗口）
-- 检测到撤回事件后立即保存，推送 SSE 通知刷新页面
+- 检测到撤回事件后立即保存，3 秒内自动刷新页面
 - 消息到达时自动下载图片 / 视频 / 语音到本地
 - Web 界面（猫萌风格）
   - 左侧按群 / 好友分类，显示未读红点
   - 消息卡片未读时左侧红线标注，点击后标记已读
   - 详情弹窗渲染文字 / 图片 / 视频 / 语音，视频附下载链接
-  - SSE 实时推送，标签页标题显示未读数
+  - 3 秒轮询刷新，标签页标题显示未读数
+  - 刷新页面后保留当前选中的群/好友
 
 ---
 
@@ -112,7 +113,7 @@ qq-recall-watcher/
 │   ├── storage.py        ← SQLite 读写
 │   └── ws_client.py      ← NapCat WebSocket 连接
 ├── web/
-│   ├── server.py         ← FastAPI 路由 + SSE
+│   ├── server.py         ← FastAPI 路由 + SSE 端点（服务端保留）
 │   └── static/           ← 前端页面
 └── data/                 ← 运行时生成（已被 .gitignore 忽略）
     ├── recalled.db       ← 撤回记录数据库
@@ -137,6 +138,29 @@ qq-recall-watcher/
 
 **换电脑后历史记录丢失**
 - `data/` 目录含 `recalled.db` 和 `media/`，整体复制到新机器即可保留历史
+
+**新电脑完整迁移步骤**
+
+1. 安装 Python 3.10+，安装 NapCat 并登录 QQ
+2. `git clone https://github.com/zChise/qq-recall-watcher.git`
+3. `pip install -r requirements.txt`
+4. 将旧电脑的 `data/` 目录整体复制到新项目目录下（保留历史记录和媒体文件）
+5. 复制 `config.json`，修改 `token` 为新机器 NapCat 的 token
+6. NapCat 网络配置 → 添加正向 WebSocket → 端口 `3001`，填写 token
+7. `python main.py`，浏览器打开 `http://127.0.0.1:8080`
+
+**注意**：`config.json` 和 `data/` 均在 `.gitignore` 中，不会被 git 同步，需手动复制。
+
+---
+
+## Windows 已知问题说明
+
+原版使用 SSE（Server-Sent Events）推送撤回通知。在 Windows 上，Python asyncio 默认使用 ProactorEventLoop（IOCP），会导致 SSE 长连接持续被重置（`ERR_CONNECTION_RESET`），进而：
+
+- 撤回红点不实时出现，需手动刷新才能看到
+- 控制台频繁报 `Task exception was never retrieved / OSError WinError 64`
+
+**修复方案**：前端改为 3 秒轮询替代 SSE，服务端抑制 WinError 64 噪音日志。无需额外依赖，行为与原版一致，延迟 ≤3 秒。
 
 ---
 

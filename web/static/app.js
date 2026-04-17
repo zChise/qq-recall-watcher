@@ -4,8 +4,12 @@ let _msgMap  = {};   // msg_id -> message object
 
 // ── API ───────────────────────────────────────────────────────────────────────
 async function apiFetch(path) {
-    const r = await fetch(path);
-    return r.json();
+    try {
+        const r = await fetch(path, { cache: 'no-store' });
+        return r.json();
+    } catch (e) {
+        return [];
+    }
 }
 
 // ── Load ──────────────────────────────────────────────────────────────────────
@@ -191,6 +195,7 @@ function selectChat(el, type, group_id, user_id) {
     document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('selected'));
     if (el) el.classList.add('selected');
     _filter = { type, group_id: group_id ?? null, user_id: user_id ?? null };
+    sessionStorage.setItem('filter', JSON.stringify(_filter));
 
     // 点进具体群/好友时，全部标已读（和 QQ 一样）
     if (type !== 'all') {
@@ -249,21 +254,23 @@ function closeDetail() {
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 
-// ── SSE ───────────────────────────────────────────────────────────────────────
-function connectSSE() {
-    const es = new EventSource('/events');
-    es.addEventListener('new_recall', e => {
-        const d = JSON.parse(e.data);
-        document.title = d.unread ? `(${d.unread}) 猫萌` : '猫萌';
-        loadChats();
-        loadMessages();
-    });
-    es.onerror = () => { es.close(); setTimeout(connectSSE, 3000); };
+// ── 轮询（替代不稳定的SSE）────────────────────────────────────────────────────
+function startPolling() {
+    setInterval(async () => {
+        await loadChats();
+        await loadMessages();
+        const unread = document.getElementById('allCount').textContent;
+        document.title = unread ? `(${unread}) 猫萌` : '猫萌';
+    }, 3000);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async () => {
+    const saved = sessionStorage.getItem('filter');
+    if (saved) {
+        try { _filter = JSON.parse(saved); } catch (_) {}
+    }
     await loadChats();
     await loadMessages();
-    connectSSE();
+    startPolling();
 })();
