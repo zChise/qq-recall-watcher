@@ -1,44 +1,32 @@
 # 猫萌 · QQ 防撤回工具
 
-基于 [NapCat](https://github.com/NapNeko/NapCatQQ) + FastAPI + SQLite 实现的 QQ 消息防撤回工具，提供本地 Web 界面查看撤回内容。
+基于 [NapCat](https://github.com/NapNeko/NapCatQQ) + FastAPI + SQLite 的 QQ 消息防撤回工具，提供本地 Web 页面查看撤回内容。
 
 ---
 
 ## 功能
 
-- 实时捕获群聊 + 私聊消息，缓存在内存中（默认 2 分钟窗口）
-- 检测到撤回事件后立即保存，3 秒内自动刷新页面
+- 实时捕获群聊 + 私聊消息，缓存在内存中（默认 2 分钟）
+- 检测到撤回事件后立即保存，页面 3 秒内自动刷新
 - 消息到达时自动下载图片 / 视频 / 语音到本地
-- Web 界面（猫萌风格）
-  - 左侧按群 / 好友分类，显示未读红点
-  - 消息卡片未读时左侧红线标注，点击后标记已读
-  - 详情弹窗渲染文字 / 图片 / 视频 / 语音，视频附下载链接
-  - 3 秒轮询刷新，标签页标题显示未读数
-  - 刷新页面后保留当前选中的群/好友
+- Web 页面按群/好友分类查看，支持未读红点与详情弹窗
 
 ---
 
 ## 环境要求
 
 - Python 3.10+
-- [NapCat](https://github.com/NapNeko/NapCatQQ) 已安装并登录 QQ 账号
+- [NapCat](https://github.com/NapNeko/NapCatQQ) 已安装并登录 QQ
 
-> NapCat 是本工具的消息来源，**必须保持运行状态**，工具才能捕获消息。
+> NapCat 是本工具的数据来源，必须保持运行。
 
 ---
 
 ## 安装
 
-**1. 克隆仓库**
-
 ```bash
 git clone https://github.com/zChise/qq-recall-watcher.git
 cd qq-recall-watcher
-```
-
-**2. 安装依赖**
-
-```bash
 pip install -r requirements.txt
 ```
 
@@ -46,13 +34,13 @@ pip install -r requirements.txt
 
 ## 配置
 
-复制模板，创建你自己的配置文件：
+复制模板并编辑：
 
 ```bash
 cp config.example.json config.json
 ```
 
-编辑 `config.json`：
+`config.json` 示例：
 
 ```json
 {
@@ -64,103 +52,194 @@ cp config.example.json config.json
 }
 ```
 
-**字段说明：**
+字段说明：
 
-- `napcat_ws`：NapCat 的 WebSocket 地址，本机默认不用改
-- `token`：在 NapCat 后台 → 网络配置 → WebSocket 服务 中查看 / 创建
-- `web_port`：本地网页端口，默认 8080
-- `buffer_minutes`：消息在内存中保留多久（分钟），超过此时间的消息撤回后无法捕获
-- `monitored`：`"all"` 监控所有，或指定群号 / QQ 号的数组，例如 `[123456789, 987654321]`
-
-**如何获取 NapCat token：**
-
-打开 NapCat WebUI → 网络配置 → 找到 WebSocket 服务那一栏 → 复制 token 填入配置文件。
+- `napcat_ws`：NapCat WebSocket 地址
+- `token`：NapCat 后台的 WebSocket token
+- `web_port`：本地网页端口（默认 `8080`）
+- `buffer_minutes`：消息缓存窗口（分钟）
+- `monitored`：`"all"` 或指定群号/QQ号数组，例如 `[123456789, 987654321]`
 
 ---
 
 ## 启动
 
-**必须在项目目录下执行：**
+在项目目录执行：
 
 ```bash
-cd qq-recall-watcher
 python main.py
 ```
 
-看到以下输出说明启动成功：
+看到以下日志代表启动成功：
 
-```
-[ws] connecting → ws://127.0.0.1:3001
+```text
+[ok] Web UI -> http://127.0.0.1:8080
+[ws] connecting -> ws://127.0.0.1:3001
 [ws] connected
-[✓] Web UI → http://127.0.0.1:8080
 ```
 
-浏览器打开 `http://127.0.0.1:8080` 即可使用。
+浏览器访问：`http://127.0.0.1:8080`
+
+---
+
+## Windows 一次性跑通（推荐）
+
+如果你在 Windows 上遇到依赖或编码问题，按下面流程可稳定启动。
+
+1. 进入项目目录
+
+```powershell
+cd C:\Users\你的用户名\...\qq-recall-watcher
+```
+
+2. 确认你用的是 Windows Python（不是 `C:\msys64\...`）
+
+```powershell
+py -0p
+```
+
+3. 创建并激活虚拟环境
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\activate
+```
+
+4. 安装依赖
+
+```powershell
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+5. 启动
+
+```powershell
+python main.py
+```
+
+以后每次启动只需：
+
+```powershell
+cd C:\Users\你的用户名\...\qq-recall-watcher
+.\.venv\Scripts\activate
+python main.py
+```
+
+---
+
+## 从零迁移到新电脑（完整步骤）
+
+目标：新电脑安装后，保留旧电脑的历史撤回记录和媒体文件。
+
+1. 新电脑安装 Python 3.10+ 与 NapCat，并登录 QQ
+2. 克隆项目并安装依赖
+
+```bash
+git clone https://github.com/zChise/qq-recall-watcher.git
+cd qq-recall-watcher
+pip install -r requirements.txt
+```
+
+3. 从旧电脑复制以下内容到新电脑同名项目目录
+- `data/recalled.db`
+- `data/media/`
+- `config.json`（可选，但推荐）
+
+4. 在新电脑 NapCat 后台获取新的 token
+- 打开 NapCat WebUI -> 网络配置 -> WebSocket 服务
+- 复制 token，写入新电脑的 `config.json`
+
+5. 确认 `config.json` 的关键项
+- `napcat_ws` 通常为 `ws://127.0.0.1:3001`
+- `token` 为新电脑 NapCat 的 token
+- `web_port` 默认 `8080`（占用可改 `8081`）
+
+6. 启动并验证
+
+```bash
+python main.py
+```
+
+验证点：
+- 页面能打开
+- 控制台出现 `[ws] connected`
+- 历史记录与媒体能正常显示
+
+注意：`config.json` 与 `data/` 被 `.gitignore` 忽略，不会随 Git 自动同步，必须手动拷贝。
+
+---
+
+## 常见问题（轻松版）
+
+### 1) `No module named uvicorn`
+依赖未装到当前环境。
+
+```powershell
+.\.venv\Scripts\activate
+python -m pip install -r requirements.txt
+```
+
+### 2) `No module named pip` / PEP 668 / `--break-system-packages`
+通常是用了 MSYS2 Python（`C:\msys64\...`）。
+
+解决：改用 `py -3.12` 创建 venv（见上文 Windows 流程）。
+
+### 3) `json.decoder.JSONDecodeError: Unexpected UTF-8 BOM`
+`config.json` 含 BOM，但程序按纯 `utf-8` 读取。
+
+解决：
+- 把 `config.json` 另存为 UTF-8（无 BOM）
+- 或程序读取使用 `utf-8-sig`
+
+### 4) `WinError 10048` 端口占用
+`web_port` 被占用。
+
+- 直接把 `config.json` 的 `web_port` 改为 `8081` 再启动
+- 或先释放占用端口再启动
+
+### 5) `taskkill /PID <上面查到的PID> /F` 报错
+`< >` 是占位符，不能原样输入。必须换成真实数字：
+
+```powershell
+taskkill /PID 12345 /F
+```
+
+### 6) `[ws] disconnected`
+- 检查 NapCat 是否在线并已登录
+- 检查 `napcat_ws` 和 `token` 是否与 NapCat 后台一致
+- 检查 NapCat WebSocket 服务端口是否可访问
 
 ---
 
 ## 目录结构
 
-```
+```text
 qq-recall-watcher/
-├── config.example.json   ← 配置模板（复制为 config.json 后填写）
-├── config.json           ← 你的配置（已被 .gitignore 忽略）
-├── main.py               ← 入口
+├── config.example.json
+├── config.json
+├── main.py
 ├── requirements.txt
 ├── core/
-│   ├── buffer.py         ← 内存缓冲（TTL 窗口）
-│   ├── downloader.py     ← 异步媒体下载
-│   ├── storage.py        ← SQLite 读写
-│   └── ws_client.py      ← NapCat WebSocket 连接
+│   ├── buffer.py
+│   ├── downloader.py
+│   ├── storage.py
+│   └── ws_client.py
 ├── web/
-│   ├── server.py         ← FastAPI 路由 + SSE 端点（服务端保留）
-│   └── static/           ← 前端页面
-└── data/                 ← 运行时生成（已被 .gitignore 忽略）
-    ├── recalled.db       ← 撤回记录数据库
-    └── media/            ← 下载的媒体文件
+│   ├── server.py
+│   └── static/
+└── data/
+    ├── recalled.db
+    └── media/
 ```
-
----
-
-## 常见问题
-
-**连接失败 / `[ws] disconnected`**
-- 确认 NapCat 正在运行且已登录
-- 检查 `napcat_ws` 地址和端口是否正确
-- 检查 `token` 是否与 NapCat 后台一致
-
-**捕获不到撤回消息**
-- 消息发出到撤回的间隔超过了 `buffer_minutes`，适当调大该值
-- NapCat 版本过旧，私聊撤回事件支持存在差异
-
-**语音无法播放**
-- QQ 语音为 `.silk` 格式，浏览器不支持原生播放，页面提供下载链接
-
-**换电脑后历史记录丢失**
-- `data/` 目录含 `recalled.db` 和 `media/`，整体复制到新机器即可保留历史
-
-**新电脑完整迁移步骤**
-
-1. 安装 Python 3.10+，安装 NapCat 并登录 QQ
-2. `git clone https://github.com/zChise/qq-recall-watcher.git`
-3. `pip install -r requirements.txt`
-4. 将旧电脑的 `data/` 目录整体复制到新项目目录下（保留历史记录和媒体文件）
-5. 复制 `config.json`，修改 `token` 为新机器 NapCat 的 token
-6. NapCat 网络配置 → 添加正向 WebSocket → 端口 `3001`，填写 token
-7. `python main.py`，浏览器打开 `http://127.0.0.1:8080`
-
-**注意**：`config.json` 和 `data/` 均在 `.gitignore` 中，不会被 git 同步，需手动复制。
 
 ---
 
 ## Windows 已知问题说明
 
-原版使用 SSE（Server-Sent Events）推送撤回通知。在 Windows 上，Python asyncio 默认使用 ProactorEventLoop（IOCP），会导致 SSE 长连接持续被重置（`ERR_CONNECTION_RESET`），进而：
+原版使用 SSE（Server-Sent Events）推送撤回通知。在 Windows 上，asyncio 的 ProactorEventLoop 可能导致 SSE 长连接被重置（`ERR_CONNECTION_RESET`）。
 
-- 撤回红点不实时出现，需手动刷新才能看到
-- 控制台频繁报 `Task exception was never retrieved / OSError WinError 64`
-
-**修复方案**：前端改为 3 秒轮询替代 SSE，服务端抑制 WinError 64 噪音日志。无需额外依赖，行为与原版一致，延迟 ≤3 秒。
+当前方案：前端使用 3 秒轮询替代 SSE，并抑制 `WinError 64` 噪声日志，无需额外依赖。
 
 ---
 
