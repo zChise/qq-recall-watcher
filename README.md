@@ -1,248 +1,114 @@
-# 猫萌 · QQ 防撤回工具
+ 猫萌 · QQ 防撤回工具（轮椅无脑手把手版）最简单好用的 QQ 消息防撤回工具
+基于 NapCat + FastAPI + SQLite，本地网页查看撤回内容，图片视频语音自动保存。核心功能实时捕获群聊和私聊消息
+有人撤回 → 立刻保存，网页 3 秒自动刷新
+图片、视频、语音自动下载到本地
+网页按群/好友分类显示，支持未读红点和详情弹窗
 
-基于 [NapCat](https://github.com/NapNeko/NapCatQQ) + FastAPI + SQLite 的 QQ 消息防撤回工具，提供本地 Web 页面查看撤回内容。
+准备工作（必须先做好）NapCat 已安装并成功登录你的 QQ（保持 NapCat 一直运行）
+Python 3.12（推荐）已安装（Windows 官方版）
 
----
+第一步：获取项目打开命令提示符（按 Win + R，输入 cmd 回车），依次执行以下命令：cmd
+指令长
 
-## 功能
-
-- 实时捕获群聊 + 私聊消息，缓存在内存中（默认 2 分钟）
-- 检测到撤回事件后立即保存，页面 3 秒内自动刷新
-- 消息到达时自动下载图片 / 视频 / 语音到本地
-- Web 页面按群/好友分类查看，支持未读红点与详情弹窗
-
----
-
-## 环境要求
-
-- Python 3.10+
-- [NapCat](https://github.com/NapNeko/NapCatQQ) 已安装并登录 QQ
-
-> NapCat 是本工具的数据来源，必须保持运行。
-
----
-
-## 安装
-
-```bash
 git clone https://github.com/zChise/qq-recall-watcher.git
 cd qq-recall-watcher
-pip install -r requirements.txt
-```
 
----
+或者直接从 GitHub 下载压缩包解压也行，解压后的文件夹名叫 qq-recall-watcher。第二步：创建虚拟环境（只做一次）在命令提示符中继续输入下面命令（必须在项目文件夹里）：cmd
+指令长
 
-## 配置
+py -3.12 -m venv .venv
 
-复制模板并编辑：
+第三步：安装依赖继续在命令提示符中输入：cmd
+指令长
 
-```bash
-cp config.example.json config.json
-```
+.\.venv\Scripts\activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 
-`config.json` 示例：
+第四步：配置 config.json（最重要的一步）在项目文件夹里找到 config.example.json
+复制一份，并把复制的文件重命名为 config.json
+用记事本或 VS Code 打开 config.json，把内容全部替换成下面这段（直接复制粘贴）：
 
-```json
+json
+
 {
   "napcat_ws": "ws://127.0.0.1:3001",
-  "token": "你的NapCat访问令牌",
+  "token": "在这里粘贴你的NapCat Token",
   "web_port": 8080,
   "buffer_minutes": 2,
   "monitored": "all"
 }
-```
 
-字段说明：
+只修改这一行：把 "token": "在这里粘贴你的NapCat Token",
+改成你的真实 Token，例如：json
 
-- `napcat_ws`：NapCat WebSocket 地址
-- `token`：NapCat 后台的 WebSocket token
-- `web_port`：本地网页端口（默认 `8080`）
-- `buffer_minutes`：消息缓存窗口（分钟）
-- `monitored`：`"all"` 或指定群号/QQ号数组，例如 `[123456789, 987654321]`
+"token": "abc123def456ghi789",
 
----
+完整示例（仅供参考，token 要换成你自己的）：json
 
-## 启动
+{
+  "napcat_ws": "ws://127.0.0.1:3001",
+  "token": "你的真实Token粘贴在这里",
+  "web_port": 8080,
+  "buffer_minutes": 2,
+  "monitored": "all"
+}
 
-在项目目录执行：
+如何获取 Token？打开 NapCat WebUI（通常是浏览器访问 http://127.0.0.1:6099）
+左侧菜单找到 网络配置 → WebSocket 服务
+找到 Token 一栏，复制里面的内容
 
-```bash
+第五步：创建一键启动文件（强烈推荐）在项目文件夹里新建一个文本文件，命名为 一键启动.bat，内容如下：bat
+蝙蝠
+
+@echo off
+chcp 65001 >nul
+echo.
+echo ========================================
+echo     猫萌 QQ 防撤回工具 - 启动中...
+echo ========================================
+echo.
+call .venv\Scripts\activate
 python main.py
-```
+pause
 
-看到以下日志代表启动成功：
+保存后，以后每次启动只需双击这个 一键启动.bat 即可。第六步：启动工具双击 一键启动.bat，看到以下内容就代表成功：
 
-```text
 [ok] Web UI -> http://127.0.0.1:8080
 [ws] connecting -> ws://127.0.0.1:3001
 [ws] connected
-```
 
-浏览器访问：`http://127.0.0.1:8080`
+然后用浏览器打开：http://127.0.0.1:8080从旧电脑迁移到新电脑（完整保留历史记录）新电脑安装 Python 和 NapCat，并登录同一个 QQ。
+把整个 qq-recall-watcher 文件夹复制到新电脑（或重新 clone）。
+从旧电脑复制以下内容覆盖到新电脑相同位置：data/recalled.db 文件
+data/media/ 文件夹
+config.json 文件
 
----
+更新 Token（必须做！）：在新电脑 NapCat WebUI 里重新获取 Token
+把新 Token 填入 config.json
 
-## Windows 一次性跑通（推荐）
+双击 一键启动.bat 启动
+浏览器打开网页，检查历史记录和媒体是否正常显示
 
-如果你在 Windows 上遇到依赖或编码问题，按下面流程可稳定启动。
+常见问题解决No module named pip / PEP 668
+没有名为 pip / PEP 668 的模块
+→ 你用了 MSYS2 Python。解决办法：用 py -3.12 -m venv .venv 创建虚拟环境。
+No module named uvicorn
+没有名为 Uvicorn 的模块
+→ 没有激活环境。先双击 一键启动.bat，或在 cmd 中先执行 .\.venv\Scripts\activate
+config.json 报 JSON 错误
+→ 用记事本另存为 UTF-8（无 BOM），或用 VS Code 保存。
+网页打不开 / 端口占用
+→ 把 config.json 中的 "web_port": 8080 改成 8081，然后重启。
+[ws] disconnected
+[WS] 已断线
+→ 检查 NapCat 是否正在运行、是否已登录 QQ、Token 是否正确。
 
-1. 进入项目目录
+项目重要目录config.json —— 配置文件（必须手动配置）
+data/recalled.db —— 所有撤回记录
+data/media/ —— 自动下载的图片、视频、语音
+一键启动.bat —— 以后启动用的
 
-```powershell
-cd C:\Users\你的用户名\...\qq-recall-watcher
-```
+注意：data/ 文件夹和 config.json 不会被 git 自动同步，换电脑时必须手动复制。免责声明
+本工具仅供个人学习和研究使用。请勿用于侵犯他人隐私，使用前请确保符合当地法律法规及 QQ 服务条款。
 
-2. 确认你用的是 Windows Python（不是 `C:\msys64\...`）
-
-```powershell
-py -0p
-```
-
-3. 创建并激活虚拟环境
-
-```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\activate
-```
-
-4. 安装依赖
-
-```powershell
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
-
-5. 启动
-
-```powershell
-python main.py
-```
-
-以后每次启动只需：
-
-```powershell
-cd C:\Users\你的用户名\...\qq-recall-watcher
-.\.venv\Scripts\activate
-python main.py
-```
-
----
-
-## 从零迁移到新电脑（完整步骤）
-
-目标：新电脑安装后，保留旧电脑的历史撤回记录和媒体文件。
-
-1. 新电脑安装 Python 3.10+ 与 NapCat，并登录 QQ
-2. 克隆项目并安装依赖
-
-```bash
-git clone https://github.com/zChise/qq-recall-watcher.git
-cd qq-recall-watcher
-pip install -r requirements.txt
-```
-
-3. 从旧电脑复制以下内容到新电脑同名项目目录
-- `data/recalled.db`
-- `data/media/`
-- `config.json`（可选，但推荐）
-
-4. 在新电脑 NapCat 后台获取新的 token
-- 打开 NapCat WebUI -> 网络配置 -> WebSocket 服务
-- 复制 token，写入新电脑的 `config.json`
-
-5. 确认 `config.json` 的关键项
-- `napcat_ws` 通常为 `ws://127.0.0.1:3001`
-- `token` 为新电脑 NapCat 的 token
-- `web_port` 默认 `8080`（占用可改 `8081`）
-
-6. 启动并验证
-
-```bash
-python main.py
-```
-
-验证点：
-- 页面能打开
-- 控制台出现 `[ws] connected`
-- 历史记录与媒体能正常显示
-
-注意：`config.json` 与 `data/` 被 `.gitignore` 忽略，不会随 Git 自动同步，必须手动拷贝。
-
----
-
-## 常见问题（轻松版）
-
-### 1) `No module named uvicorn`
-依赖未装到当前环境。
-
-```powershell
-.\.venv\Scripts\activate
-python -m pip install -r requirements.txt
-```
-
-### 2) `No module named pip` / PEP 668 / `--break-system-packages`
-通常是用了 MSYS2 Python（`C:\msys64\...`）。
-
-解决：改用 `py -3.12` 创建 venv（见上文 Windows 流程）。
-
-### 3) `json.decoder.JSONDecodeError: Unexpected UTF-8 BOM`
-`config.json` 含 BOM，但程序按纯 `utf-8` 读取。
-
-解决：
-- 把 `config.json` 另存为 UTF-8（无 BOM）
-- 或程序读取使用 `utf-8-sig`
-
-### 4) `WinError 10048` 端口占用
-`web_port` 被占用。
-
-- 直接把 `config.json` 的 `web_port` 改为 `8081` 再启动
-- 或先释放占用端口再启动
-
-### 5) `taskkill /PID <上面查到的PID> /F` 报错
-`< >` 是占位符，不能原样输入。必须换成真实数字：
-
-```powershell
-taskkill /PID 12345 /F
-```
-
-### 6) `[ws] disconnected`
-- 检查 NapCat 是否在线并已登录
-- 检查 `napcat_ws` 和 `token` 是否与 NapCat 后台一致
-- 检查 NapCat WebSocket 服务端口是否可访问
-
----
-
-## 目录结构
-
-```text
-qq-recall-watcher/
-├── config.example.json
-├── config.json
-├── main.py
-├── requirements.txt
-├── core/
-│   ├── buffer.py
-│   ├── downloader.py
-│   ├── storage.py
-│   └── ws_client.py
-├── web/
-│   ├── server.py
-│   └── static/
-└── data/
-    ├── recalled.db
-    └── media/
-```
-
----
-
-## Windows 已知问题说明
-
-原版使用 SSE（Server-Sent Events）推送撤回通知。在 Windows 上，asyncio 的 ProactorEventLoop 可能导致 SSE 长连接被重置（`ERR_CONNECTION_RESET`）。
-
-当前方案：前端使用 3 秒轮询替代 SSE，并抑制 `WinError 64` 噪声日志，无需额外依赖。
-
----
-
-## 免责声明
-
-本工具仅供个人学习和研究使用。请勿用于侵犯他人隐私，使用前请确保符合当地法律法规及平台服务条款。
